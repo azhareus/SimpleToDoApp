@@ -1,7 +1,7 @@
 package com.example.simpletodo;
 
 import android.os.Bundle;
-import android.os.FileUtils;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -11,85 +11,85 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import org.apache.commons.io.FileUtils;
+
+import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 
+
 public class MainActivity extends AppCompatActivity {
 
     List<String> items;
 
-    Button buttonAdd;
+    Button btnAdd;
     EditText etItem;
     RecyclerView rvItems;
     ItemsAdapter itemsAdapter;
-
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-
-        buttonAdd = findViewById(R.id.buttonAdd);
+        btnAdd = findViewById(R.id.btnAdd);
         etItem = findViewById(R.id.etItem);
         rvItems = findViewById(R.id.rvItems);
 
-        loadItems();
-        items.add("Do my homework");
-        items.add("Study cs");
-        items.add("Play soccer");
-        items.add("Get ice-cream :)");
 
+        //etItem.setText("I'm doing this from Java!");
+        loadItems();
         ItemsAdapter.OnLongClickListener onLongClickListener = new ItemsAdapter.OnLongClickListener(){
             @Override
             public void onItemLongClicked(int position) {
-                //delete item from model
+                //delete the item from the model
                 items.remove(position);
-                //notify adapter
+                //Notify the adapter
                 itemsAdapter.notifyItemRemoved(position);
-                Toast.maketext(getApplicationContext(), "Item was removed", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getApplicationContext(), "Item was removed", Toast.LENGTH_SHORT).show();
                 saveItems();
             }
         };
-        itemsAdapter = new ItemsAdapter(items,onLongClickListener);
+        itemsAdapter = new ItemsAdapter(items, onLongClickListener);
         rvItems.setAdapter(itemsAdapter);
-        rvItems.SetLayoutManager(new LinearLayoutManager(context: this));
+        rvItems.setLayoutManager(new LinearLayoutManager(this));
 
-        buttonAdd.setOnClickListener(new View.OnClickListener()) {
+        btnAdd.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View v) {
+            public void onClick(View view) {
                 String todoItem = etItem.getText().toString();
-
-                //add item to the model
+                //Add item to the model
                 items.add(todoItem);
                 //Notify adapter that an item is inserted
-                itemsAdapter.notifyItemInserted(items.size() -1);
+                itemsAdapter.notifyItemInserted(items.size()-1);
                 etItem.setText("");
-                Toast.maketext(getApplicationContext(), "Item was added", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getApplicationContext(), "Item was added", Toast.LENGTH_SHORT).show();
                 saveItems();
             }
         });
-
     }
-    private File getDataFile() {
-        return new File(getFilesDir()), child: "data.txt");
+    private File getDataFile(){
+        return new File(getFilesDir(), "data.txt");
     }
-    //function that will load items by reading every line of the data file
-    private void loadItems() {
-        items = new ArrayList<>(FileUtils.readLines(getDataFile(), Charset.defaultCharset()));
-    } catch (IOException e) {
-        e.printStackTrace();
-        log.e(tag: "MainActivity", msg: "Error reading items", e);
-        items = new ArrayList<>();
+    //This function will load items by reading every line of the data file
+    private void loadItems(){
+        try {
+            this.items = new ArrayList<>(FileUtils.readLines(getDataFile(), Charset.defaultCharset()));
+        } catch (IOException e) {
+            Log.e("MainActivty", "Error reading items,", e);
+            this.items = new ArrayList<>(); //start from scratch if no file is found.
+        }
     }
+    //This function saves items by writing into the data file
+    private void saveItems(){
+        try {
+            FileUtils.writeLines(getDataFile(), items);
+        } catch (IOException e) {
+            Log.e("MainActivty", "Error writing items,", e);
 
+        }
 
-    //function saves items by writing them into the data file
-    private void saveItems() {
-        FileUtils.writeLines(getDataFile(), items);
-    } catch (IOException e){
-        log.e(tag:   "MainActivity",msg:"Error reading items",e);
     }
 }
 
